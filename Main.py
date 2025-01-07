@@ -1,4 +1,10 @@
-from crewai import Crew, Task, Agent
-from crewai_tools import SerperDevTool
-from langchain_ibm import WatsonxLLM
-import os
+def getApiKey() -> str:
+    try:
+        with open("openai.txt", "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        raise FileNotFoundError("API key not found!")
+
+if __name__ == "__main__":
+    apiKey = getApiKey()
+    
