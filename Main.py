@@ -1,19 +1,36 @@
 import ollama
 
-def init(version) -> None:
-    with open("modelfile", "r") as file:
-        build = file.read()
-    ollama.create(model = version, modelfile = build, stream = True)
+def chat(prompt, version = "llama3.2") -> None:
+    messages = [
+    {
+        'role': 'user',
+        'content': f"{prompt}",
+    },
+    ]
+    response = ollama.chat(version, messages = messages)
+    print(response['message']['content'])
+
+def getStatus() -> None:
+    response: ollama.ProcessResponse = ollama.ps()
+    for model in response.models:
+        print('Model: ', model.model)
+        print('  Digest: ', model.digest)
+        print('  Expires at: ', model.expires_at)
+        print('  Size: ', model.size)
+        print('  Size vram: ', model.size_vram)
+        print('  Details: ', model.details)
+        print('\n')
     return None
 
 if __name__ == "__main__":
-    version = "Agent"
-    init(version)
+    version = input("Enter Model Name: ")
     print("Welcome to the Llama Chatbot!")
     print("Type 'exit' to quit.")
     while True:
         prompt = input(">>> ").strip().lower()
         if prompt == "exit":
             break
-        response = ollama.generate('llama3.2', prompt)
-        print(response['response'])
+        elif prompt == "status":
+            getStatus()
+            continue
+        chat(prompt)
