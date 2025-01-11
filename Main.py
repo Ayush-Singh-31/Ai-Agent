@@ -1,7 +1,6 @@
 import ollama 
 import subprocess
 import os
-import time
 
 def welcome() -> None:
     print("=" * 40)
@@ -29,6 +28,7 @@ def makeCustom() -> str:
 
     print("Model Created Successfully!")
     print()
+
     return modelName
 
 def chat(prompt, version) -> None:
@@ -50,7 +50,6 @@ def getStatus() -> None:
         print('  Size: ', model.size)
         print('  Size vram: ', model.size_vram)
         print('  Details: ', model.details)
-        print('\n')
     return None
 
 def cleanUp(version: str) -> None:
@@ -62,7 +61,7 @@ def cleanUp(version: str) -> None:
 if __name__ == "__main__":
     welcome()
         
-    version = "llama3.2"
+    version = "phi4"
     customeModel = False
     while True:
         prompt = input(">>> ").strip().lower()
@@ -76,4 +75,5 @@ if __name__ == "__main__":
         elif prompt == "create":
             customeModel = True
             version = makeCustom()
+            continue
         chat(prompt, version)
