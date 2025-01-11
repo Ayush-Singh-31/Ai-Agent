@@ -1,4 +1,18 @@
-import ollama, subprocess
+import ollama 
+import subprocess
+import os
+import time
+
+def welcome() -> None:
+    print("=" * 40)
+    print("    Welcome to the Llama3.2 Chatbot!    ")
+    print("=" * 40)
+    print("Type 'exit'   : To quit the chatbot")
+    print("Type 'status' : To check the status of models")
+    print("Type 'create' : To create new model")
+    print("=" * 40)
+    print()
+    return None
 
 def makeCustom() -> str:
 
@@ -10,8 +24,11 @@ def makeCustom() -> str:
         file.write(f"FROM llama3.2\n")
         file.write(f"PARAMETER temperature {temperature}\n")
         file.write(f"SYSTEM \"\"\"{system}\"\"\"\n")
-        
-    subprocess.run(['ollama', 'create', modelName, '-f', './Modelfile'])
+
+    subprocess.run(['ollama', 'create', modelName, '-f', './Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+
+    print("Model Created Successfully!")
+    print()
     return modelName
 
 def chat(prompt, version) -> None:
@@ -36,22 +53,27 @@ def getStatus() -> None:
         print('\n')
     return None
 
+def cleanUp(version: str) -> None:
+    subprocess.run(['ollama', 'stop', version], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    subprocess.run(['ollama', 'rm', version], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    os.remove('./Modelfile')
+    return None
+
 if __name__ == "__main__":
-    print("Welcome to the Llama Chatbot!")
-    print("Type 'exit' to quit.")
-    print("Type 'status' to check the status of the models.")
-
-    defonew = input("Would you like to create a new model? (y/n): ").strip().lower()
-    if defonew == "y":
-        version = makeCustom()
-    else:
-        version = "llama3.2"
-
+    welcome()
+        
+    version = "llama3.2"
+    customeModel = False
     while True:
         prompt = input(">>> ").strip().lower()
         if prompt == "exit":
+            if customeModel == True:
+                cleanUp(version)
             break
         elif prompt == "status":
             getStatus()
             continue
+        elif prompt == "create":
+            customeModel = True
+            version = makeCustom()
         chat(prompt, version)
