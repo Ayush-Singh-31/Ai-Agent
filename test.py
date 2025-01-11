@@ -1,8 +1,8 @@
 import subprocess, ollama
 
-subprocess.run(['ollama', 'create', 'Task-Breaker', '-f', './TaskBreaker-Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+subprocess.run(['ollama', 'create', 'Language', '-f', './Language-Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
-version = "Task-Breaker"
+version = "Language"
 while True:
     prompt = input("Enter your prompt: ")
     messages = [

@@ -69,6 +69,16 @@ def makeCustom(version: str) -> str:
 
     return modelName
 
+def langcheck(prompt: str) -> str:
+    messages = [
+    {
+        'role': 'user',
+        'content': f"{prompt}",
+    },
+    ]
+    response = ollama.chat("Language", messages = messages)
+    return response['message']['content']
+
 def chat(prompt, version) -> None:
     messages = [
     {
@@ -118,4 +128,6 @@ if __name__ == "__main__":
         elif prompt == "change":
             version = input("Enter Model Name: ")
             continue
+        prompt = langcheck(prompt)
+        print("\n"+prompt+"\n")
         chat(prompt, version)
