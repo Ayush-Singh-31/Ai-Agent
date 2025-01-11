@@ -14,7 +14,25 @@ def welcome() -> None:
     print()
     return None
 
+def initDecider() -> None:
+    subprocess.run(['ollama', 'rm', 'Decider'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    subprocess.run(['ollama', 'create', 'Decider', '-f', './Decider-Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    return None
+
+def initLanguage() -> None:
+    subprocess.run(['ollama', 'rm', 'Language'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    subprocess.run(['ollama', 'create', 'Language', '-f', './Language-Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    return None
+
+def initTaskBreaker() -> None:
+    subprocess.run(['ollama', 'rm', 'Task-Breaker'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    subprocess.run(['ollama', 'create', 'Task-Breaker', '-f', './TaskBreaker-Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    return None
+
 def init() -> None:
+    initDecider()
+    initLanguage()
+    initTaskBreaker()
     os.system('touch Models.txt')
     models = subprocess.run(["ollama","list"], stdout = subprocess.PIPE, text = True)
     models = models.stdout.split("\n")
@@ -44,6 +62,7 @@ def makeCustom(version: str) -> str:
         file.write(f"SYSTEM \"\"\"{system}\"\"\"\n")
 
     subprocess.run(['ollama', 'create', modelName, '-f', f'./{modelName}'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    addModel(version)
 
     print("Model Created Successfully!")
     print()
@@ -95,7 +114,6 @@ if __name__ == "__main__":
             if version == "Error(1)":
                 print("Error in creating model!")
                 continue
-            addModel(version)
             continue
         elif prompt == "change":
             version = input("Enter Model Name: ")

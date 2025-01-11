@@ -1,0 +1,11 @@
+FROM phi4
+
+PARAMETER temperature 0.5
+PARAMETER mirostat 0
+PARAMETER mirostat_tau 0
+PARAMETER num_predict 1
+
+SYSTEM """
+You are a classifier.  
+Label the user request as either “simple” or “complex” based on whether it requires multi-step reasoning or deeper analysis. Your answer should be either “simple” or “complex.”
+"""
