@@ -80,6 +80,7 @@ def langcheck(prompt: str) -> str:
     return response['message']['content']
 
 def taskClassifier(prompt: str) -> str:
+    # Use Lighter Model for Task Classification
     messages = [
     {
         'role': 'user',
@@ -89,20 +90,40 @@ def taskClassifier(prompt: str) -> str:
     response = ollama.chat("Decider", messages = messages)
     return response['message']['content']
 
-def chat(prompt, version) -> None:
-    if taskClassifier(prompt) == "complex":
-        print("Complex Task Not Supported Yet!")
-        return None
-    
+def complexTask(prompt: str) -> list:
     messages = [
     {
         'role': 'user',
         'content': f"{prompt}",
     },
     ]
-    response = ollama.chat(version, messages = messages)
-    print(response['message']['content'])
-    return None
+    response = ollama.chat("Task-Breaker", messages = messages)
+    taskList = response['message']['content']
+    taskList = taskList.split("\n")
+    subtasks = []
+    for task in taskList:
+        if taskClassifier(task) == "complex":
+            complexTask(task)
+        else:
+            subtasks.append(task)
+    return subtasks
+
+def chat(prompt, version) -> None:
+    if taskClassifier(prompt) == "complex":
+        print("Going Complex")
+        subtasks = complexTask(prompt)
+        print(subtasks)
+        return None
+    else:
+        messages = [
+        {
+            'role': 'user',
+            'content': f"{prompt}",
+        },
+        ]
+        response = ollama.chat(version, messages = messages)
+        print(response['message']['content'])
+        return None
 
 def getStatus() -> None:
     response: ollama.ProcessResponse = ollama.ps()
