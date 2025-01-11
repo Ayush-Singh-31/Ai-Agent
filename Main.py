@@ -79,7 +79,21 @@ def langcheck(prompt: str) -> str:
     response = ollama.chat("Language", messages = messages)
     return response['message']['content']
 
+def taskClassifier(prompt: str) -> str:
+    messages = [
+    {
+        'role': 'user',
+        'content': f"{prompt}",
+    },
+    ]
+    response = ollama.chat("Decider", messages = messages)
+    return response['message']['content']
+
 def chat(prompt, version) -> None:
+    if taskClassifier(prompt) == "complex":
+        print("Complex Task Not Supported Yet!")
+        return None
+    
     messages = [
     {
         'role': 'user',
@@ -129,5 +143,4 @@ if __name__ == "__main__":
             version = input("Enter Model Name: ")
             continue
         prompt = langcheck(prompt)
-        print("\n"+prompt+"\n")
         chat(prompt, version)
