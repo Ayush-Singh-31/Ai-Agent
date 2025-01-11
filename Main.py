@@ -9,22 +9,41 @@ def welcome() -> None:
     print("Type 'exit'   : To quit the chatbot")
     print("Type 'status' : To check the status of models")
     print("Type 'create' : To create new model")
+    print("Type 'change' : To change to another model")
     print("=" * 40)
     print()
     return None
 
-def makeCustom() -> str:
+def init() -> None:
+    os.system('touch Models.txt')
+    models = subprocess.run(["ollama","list"], stdout = subprocess.PIPE, text = True)
+    models = models.stdout.split("\n")
+    with open('Models.txt', 'w') as file:
+        for i in range(1,len(models)):
+            if len(models[i]) > 0:
+                file.write(models[i].split()[0].split(":")[0] + "\n")
+    return None
+
+def addModel(version: str) -> None:
+    with open('Models.txt', 'w') as file:
+        file.write(version + "\n")
+    return None
+
+def makeCustom(version: str) -> str:
 
     modelName = input("Enter New Model Name: ")
     temperature = input("Enter New Model temperature: ")
     system = input("Enter New Model System: ")
-
-    with open('./Modelfile', 'w') as file:
-        file.write(f"FROM llama3.2\n")
+    if len(modelName) == 0 or len(temperature) == 0 or len(system) == 0:
+        print("Invalid Input!")
+        return "Error(1)"
+    with open(f'./{modelName}', 'w') as file:
+        file.write(f"# {modelName}\n")
+        file.write(f"FROM {version}\n")
         file.write(f"PARAMETER temperature {temperature}\n")
         file.write(f"SYSTEM \"\"\"{system}\"\"\"\n")
 
-    subprocess.run(['ollama', 'create', modelName, '-f', './Modelfile'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    subprocess.run(['ollama', 'create', modelName, '-f', f'./{modelName}'], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
     print("Model Created Successfully!")
     print()
@@ -40,6 +59,7 @@ def chat(prompt, version) -> None:
     ]
     response = ollama.chat(version, messages = messages)
     print(response['message']['content'])
+    return None
 
 def getStatus() -> None:
     response: ollama.ProcessResponse = ollama.ps()
@@ -54,26 +74,30 @@ def getStatus() -> None:
 
 def cleanUp(version: str) -> None:
     subprocess.run(['ollama', 'stop', version], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-    subprocess.run(['ollama', 'rm', version], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-    os.remove('./Modelfile')
+    os.remove('Models.txt')
     return None
 
 if __name__ == "__main__":
     welcome()
-        
+    init()
+    
     version = "phi4"
-    customeModel = False
     while True:
         prompt = input(">>> ").strip().lower()
         if prompt == "exit":
-            if customeModel == True:
-                cleanUp(version)
+            cleanUp(version)
             break
         elif prompt == "status":
             getStatus()
             continue
         elif prompt == "create":
-            customeModel = True
-            version = makeCustom()
+            version = makeCustom(version)
+            if version == "Error(1)":
+                print("Error in creating model!")
+                continue
+            addModel(version)
+            continue
+        elif prompt == "change":
+            version = input("Enter Model Name: ")
             continue
         chat(prompt, version)
