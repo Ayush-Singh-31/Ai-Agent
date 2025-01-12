@@ -102,17 +102,22 @@ def complexTask(prompt: str) -> list:
     taskList = taskList.split("\n")
     subtasks = []
     for task in taskList:
-        if taskClassifier(task) == "complex":
-            complexTask(task)
-        else:
-            subtasks.append(task)
+        subtasks.append(task)
     return subtasks
 
 def chat(prompt, version) -> None:
     if taskClassifier(prompt) == "complex":
-        print("Going Complex")
         subtasks = complexTask(prompt)
-        print(subtasks)
+        for task in subtasks:
+            messages = [
+            {
+                'role': 'user',
+                'content': f"How to: {task}",
+            },
+            ]
+            response = ollama.chat(version, messages = messages)
+            print(response['message']['content'])
+            print()
         return None
     else:
         messages = [
